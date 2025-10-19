@@ -186,11 +186,22 @@ sudo systemctl status pi_pomodoro.service
 * Automatic startup ensures the Pi is always ready as a Pomodoro device.
 * **A Touch pHAT or compatible LED/button interface is required** for full functionality.
 
-## Troubleshooting
+## Troubleshooting & Logging
 
-### 1. Service Won’t Start
+### 1. View Logs in Real Time
 
-* Check the username in your systemd service (`User=`). It must match your Pi user (`sla` in your setup).
+All messages from the Pomodoro script are logged using Python’s `logging` module. To see logs live:
+
+```bash
+journalctl -u pi_pomodoro.service -f
+```
+
+* `-f` → follow logs in real time
+* You will see timestamps, log levels, and messages (e.g., when Enter or Back is pressed, when wait/effect periods start)
+
+### 2. Service Won’t Start
+
+* Ensure the **user** in your service file matches your Pi user (`sla` in your setup).
 * Reload systemd after changes:
 
 ```bash
@@ -205,9 +216,9 @@ sudo systemctl status pi_pomodoro.service
 journalctl -u pi_pomodoro.service -b
 ```
 
-### 2. LEDs Don’t Light or Fade
+### 3. LEDs Don’t Light or Fade
 
-* Ensure the user is in the `gpio` and `i2c` groups:
+* Make sure the user is in `gpio` and `i2c` groups:
 
 ```bash
 sudo usermod -aG gpio,i2c sla
@@ -221,31 +232,16 @@ sudo raspi-config
 sudo reboot
 ```
 
-* Make sure all LEDs are connected and working. If using Touch pHAT, verify the hardware is seated properly.
-
-### 3. Python Errors
-
-* Check that all dependencies are installed:
-
-```bash
-cd /home/sla/pi_pomodoro
-pip3 install -r requirements.txt
-```
-
-* Run the script manually to see Python errors:
-
-```bash
-python3 /home/sla/pi_pomodoro/pi_pomodoro_timer.py
-```
+* Confirm all LEDs/buttons are connected and working.
 
 ### 4. Script Doesn’t Respond to Buttons
 
-* Confirm the correct GPIO pins are used for Enter and Back.
-* Ensure no other process is using the I2C bus.
+* Verify the correct LED/button pins are used for Enter and Back.
+* Make sure no other process is using the I2C bus.
 
 ### 5. Adjusting Pomodoro Times
 
-* Use **command line arguments**, **environment variables**, or defaults in minutes:
+* Configure durations via **CLI arguments**, **environment variables**, or defaults in minutes:
 
 ```bash
 python3 pi_pomodoro_timer.py 25 5
@@ -253,10 +249,11 @@ export WAIT_MIN=25
 export EFFECT_MIN=5
 ```
 
-### 6. Debugging Logs
+### 6. Debugging Notes
 
-* To see real-time logs of the systemd service:
+* Logs provide insights on:
 
-```bash
-journalctl -f -u pi_pomodoro.service
-```
+  * When Enter/Back are pressed
+  * “I’m ready” sequence start
+  * Wait and effect periods
+* Use `journalctl` to confirm the timer loop is running and LED effects are triggered as expected.
