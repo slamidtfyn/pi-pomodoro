@@ -1,12 +1,10 @@
 # Pi Pomodoro Timer
 
-Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using all LEDs on your interface.
+Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using all LEDs on a compatible LED interface (original project uses a Touch pHAT).
 
 * **All LEDs (Back, A, B, C, D, Enter)** indicate active Pomodoro sessions via a rolling fade effect.
 * **Enter button** starts/stops the timer loop.
 * **Back button** resets the timer to the initial state (all LEDs on, waiting to start).
-
----
 
 ## Features
 
@@ -14,8 +12,6 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 * Dynamic rolling LED fade shows active Pomodoro sessions
 * Short **“I’m ready” sequence** confirms timer start
 * Automatically starts on Raspberry Pi boot
-
----
 
 ## How it Works as a Pomodoro Timer
 
@@ -39,13 +35,11 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 
 > Tip: Adjust **WAIT_MIN** and **EFFECT_MIN** to match your preferred Pomodoro intervals (e.g., 25/5 minutes).
 
----
-
 ## Requirements
 
 * Raspberry Pi Zero 2 W
 * Micro SD card (8GB+)
-* LED-enabled interface (original project used Touch pHAT)
+* **Touch pHAT or any compatible LED/button interface** (this project was tested with Touch pHAT)
 * USB keyboard for initial setup (optional)
 * Internet access for Raspberry Pi setup
 
@@ -55,7 +49,7 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 
 ```
 +-----------------+
-|  Touch LEDs     |
+|  LEDs / Buttons |
 +-----------------+
 | Back    Enter   |
 | A   B   C   D   |
@@ -66,8 +60,6 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 * **Back:** Reset timer to initial state
 * **A, B, C, D:** Show rolling fade during active Pomodoro periods
 * **All LEDs** are on initially to indicate ready state
-
----
 
 ## Step 1: Flash Raspberry Pi OS
 
@@ -85,8 +77,6 @@ network={
     key_mgmt=WPA-PSK
 }
 ```
-
----
 
 ## Step 2: Boot & SSH
 
@@ -125,7 +115,7 @@ pip3 install -r requirements.txt
 
 ## Step 4: Connect LEDs
 
-* Connect LEDs to GPIO pins (or use a compatible interface).
+* Connect all LEDs and buttons to GPIO pins using a compatible interface (Touch pHAT recommended).
 * All LEDs (Back, A, B, C, D, Enter) are used for Pomodoro timer effects.
 
 ## Step 5: Place Script & Configure
@@ -194,3 +184,5 @@ sudo systemctl status pi_pomodoro.service
 
 * Supports **minutes-based configuration** via CLI args or environment variables.
 * Automatic startup ensures the Pi is always ready as a Pomodoro device.
+* **A Touch pHAT or compatible LED/button interface is required** for full functionality.
+
