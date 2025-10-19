@@ -8,7 +8,7 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 
 ## Features
 
-* Configurable **work/wait durations** (default 5 min wait / 1 min effect)
+* Configurable **work/pause durations** (default 25 min work / 5 min pause)
 * Dynamic rolling LED fade shows active Pomodoro sessions
 * Short **“I’m ready” sequence** confirms timer start
 * Automatically starts on Raspberry Pi boot
@@ -23,8 +23,8 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
 2. **Press Enter:**
 
    * Short “I’m ready” LED fade runs (~few seconds)
-   * Wait timer begins (**configurable via WAIT_MIN**)
-   * After wait timer expires, rolling fade runs for the effect duration (**configurable via EFFECT_MIN**)
+   * Work timer begins (**configurable via WORK_MIN**)
+   * After work timer expires, rolling fade runs for the pause duration (**configurable via PAUSE_MIN**)
    * The cycle repeats until **Enter** is pressed again to stop.
 
 3. **Press Back at any time:**
@@ -33,7 +33,7 @@ Turn your **Raspberry Pi Zero 2 W** into a configurable **Pomodoro timer** using
    * All LEDs on
    * Waiting for Enter to start a new Pomodoro session
 
-> Tip: Adjust **WAIT_MIN** and **EFFECT_MIN** to match your preferred Pomodoro intervals (e.g., 25/5 minutes).
+> Tip: Adjust **WORK_MIN** and **PAUSE_MIN** to match your preferred Pomodoro intervals (e.g., 25/5 minutes).
 
 ## Requirements
 
@@ -129,15 +129,15 @@ chmod +x /home/pi/pi_pomodoro/pi_pomodoro_timer.py
 
 3. Configure **Pomodoro durations** (minutes):
 
-* **Command line:** `python3 pi_pomodoro_timer.py 25 5` → 25 min wait / 5 min effect
+* **Command line:** `python3 pi_pomodoro_timer.py 25 5` → 25 min work / 5 min pause
 * **Environment variables:**
 
 ```bash
-export WAIT_MIN=25
-export EFFECT_MIN=5
+export WORK_MIN=25
+export PAUSE_MIN=5
 ```
 
-* **Default values:** 5/1 min
+* **Default values:** 25/5 min
 
 ## Step 6: Run Script on Boot
 
@@ -197,12 +197,11 @@ journalctl -u pi_pomodoro.service -f
 ```
 
 * `-f` → follow logs in real time
-* You will see timestamps, log levels, and messages (e.g., when Enter or Back is pressed, when wait/effect periods start)
+* You will see timestamps, log levels, and messages (e.g., when Enter or Back is pressed, when work/pause periods start)
 
 ### 2. Service Won’t Start
 
-* Ensure the **user** in your service file matches your Pi user (`sla` in your setup).
-* Reload systemd after changes:
+* Ensure the **user** in your service file matches your Pi user * Reload systemd after changes:
 
 ```bash
 sudo systemctl daemon-reload
@@ -221,7 +220,7 @@ journalctl -u pi_pomodoro.service -b
 * Make sure the user is in `gpio` and `i2c` groups:
 
 ```bash
-sudo usermod -aG gpio,i2c sla
+sudo usermod -aG gpio,i2c <pi user>
 ```
 
 * Enable I2C in `raspi-config`:
@@ -245,8 +244,8 @@ sudo reboot
 
 ```bash
 python3 pi_pomodoro_timer.py 25 5
-export WAIT_MIN=25
-export EFFECT_MIN=5
+export WORK_MIN=25
+export PAUSE_MIN=5
 ```
 
 ### 6. Debugging Notes
@@ -255,5 +254,5 @@ export EFFECT_MIN=5
 
   * When Enter/Back are pressed
   * “I’m ready” sequence start
-  * Wait and effect periods
+  * Work and pause periods
 * Use `journalctl` to confirm the timer loop is running and LED effects are triggered as expected.
