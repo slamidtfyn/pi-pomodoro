@@ -156,7 +156,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/pi_pomodoro/pi_pomodoro_timer.py
+ExecStart=/usr/bin/python3 /home/pi/pi-pomodoro/pi_pomodoro_timer.py
 WorkingDirectory=/home/pi/pi_pomodoro
 Restart=always
 User=pi
