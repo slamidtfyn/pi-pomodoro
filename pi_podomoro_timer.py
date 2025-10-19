@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Pi Pomodoro Timer
+
 Uses all LEDs (Back, A, B, C, D, Enter) to show a rolling fade effect.
 Enter: Start/Stop loop
 Back: Reset to initial state
@@ -15,6 +16,14 @@ from time import sleep, time
 from threading import Thread, Event
 import os
 import sys
+import logging
+
+# ================= Logging =================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger()
 
 # ================= Configuration =================
 ALL_LEDS = ["Back", "A", "B", "C", "D", "Enter"]
@@ -27,15 +36,12 @@ DEFAULT_WAIT_MIN = 5
 DEFAULT_EFFECT_MIN = 1
 
 # ======== Load configuration (priority) ========
-# 1. Command line arguments
 if len(sys.argv) >= 3:
     WAIT_MIN = float(sys.argv[1])
     EFFECT_MIN = float(sys.argv[2])
-# 2. Environment variables
 elif os.getenv("WAIT_MIN") and os.getenv("EFFECT_MIN"):
     WAIT_MIN = float(os.getenv("WAIT_MIN"))
     EFFECT_MIN = float(os.getenv("EFFECT_MIN"))
-# 3. Default values
 else:
     WAIT_MIN = DEFAULT_WAIT_MIN
     EFFECT_MIN = DEFAULT_EFFECT_MIN
@@ -109,11 +115,11 @@ def effect_loop():
     global first_run
     while running and not stop_event.is_set():
         if first_run:
-            print("First Enter press: 'I'm ready' light sequence")
+            logger.info("First Enter press: 'I'm ready' light sequence")
             ready_light_sequence()
             first_run = False
 
-        print(f"Waiting {WAIT_MIN} minutes...")
+        logger.info(f"Waiting {WAIT_MIN} minutes...")
         for _ in range(int(WAIT_TIME)):
             if stop_event.is_set():
                 return
@@ -121,7 +127,7 @@ def effect_loop():
 
         if stop_event.is_set():
             return
-        print(f"Running {EFFECT_MIN} minutes dynamic smooth fade effect")
+        logger.info(f"Running {EFFECT_MIN} minutes dynamic smooth fade effect")
         end_time = time() + EFFECT_TIME
         while time() < end_time and not stop_event.is_set():
             dynamic_smooth_fade(duration=2.0)
@@ -136,13 +142,13 @@ def toggle_running():
         first_run = True
         t = Thread(target=effect_loop)
         t.start()
-        print("Enter pressed: Loop started")
+        logger.info("Enter pressed: Loop started")
     else:
         running = False
         stop_event.set()
         for l in ALL_LEDS:
             touchphat.set_led(l, 0)
-        print("Enter pressed: Loop stopped, all LEDs off")
+        logger.info("Enter pressed: Loop stopped, all LEDs off")
 
 def reset_to_initial_state():
     """Reset script to initial state when Back is pressed"""
@@ -152,14 +158,14 @@ def reset_to_initial_state():
     first_run = True
     for l in ALL_LEDS:
         touchphat.set_led(l, 1)
-    print("Back pressed: Reset to initial state, waiting for Enter...")
+    logger.info("Back pressed: Reset to initial state, waiting for Enter...")
 
 # -------- Bind buttons --------
 touchphat.on_touch("Enter", lambda _: toggle_running())
 touchphat.on_touch("Back", lambda _: reset_to_initial_state())
 
 # -------- Keep script running --------
-print(f"All LEDs on. Press Enter to start/stop the loop. WAIT={WAIT_MIN} min, EFFECT={EFFECT_MIN} min")
+logger.info(f"All LEDs on. Press Enter to start/stop the loop. WAIT={WAIT_MIN} min, EFFECT={EFFECT_MIN} min")
 try:
     while True:
         sleep(1)
@@ -167,4 +173,4 @@ except KeyboardInterrupt:
     stop_event.set()
     for l in ALL_LEDS:
         touchphat.set_led(l, 0)
-    print("Program terminated, all LEDs off")
+    logger.info("Program terminated, all LEDs off")
