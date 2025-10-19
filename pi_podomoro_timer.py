@@ -5,7 +5,7 @@ Pi Pomodoro Timer
 Uses all LEDs (Back, A, B, C, D, Enter) to show a rolling fade effect.
 Enter: Start/Stop loop
 Back: Reset to initial state
-Configurable WAIT and EFFECT times in minutes:
+Configurable WORK and PAUSE times in minutes:
 1. Command line args
 2. Environment variables
 3. Defaults
@@ -32,23 +32,23 @@ DELAY = 0.02            # Base delay for micro-blinks
 LED_OFF_DELAY = 0.01    # Stagger between LEDs for rolling effect
 
 # Default times in minutes
-DEFAULT_WAIT_MIN = 5
-DEFAULT_EFFECT_MIN = 1
+DEFAULT_WORK_MIN = 25
+DEFAULT_PAUSE_MIN = 5
 
 # ======== Load configuration (priority) ========
 if len(sys.argv) >= 3:
-    WAIT_MIN = float(sys.argv[1])
-    EFFECT_MIN = float(sys.argv[2])
-elif os.getenv("WAIT_MIN") and os.getenv("EFFECT_MIN"):
-    WAIT_MIN = float(os.getenv("WAIT_MIN"))
-    EFFECT_MIN = float(os.getenv("EFFECT_MIN"))
+    WORK_MIN = float(sys.argv[1])
+    PAUSE_MIN = float(sys.argv[2])
+elif os.getenv("WORK_MIN") and os.getenv("PAUSE_MIN"):
+    WORK_MIN = float(os.getenv("WORK_MIN"))
+    PAUSE_MIN = float(os.getenv("PAUSE_MIN"))
 else:
-    WAIT_MIN = DEFAULT_WAIT_MIN
-    EFFECT_MIN = DEFAULT_EFFECT_MIN
+    WORK_MIN = DEFAULT_WORK_MIN
+    PAUSE_MIN = DEFAULT_PAUSE_MIN
 
 # Convert minutes to seconds
-WAIT_TIME = WAIT_MIN * 60
-EFFECT_TIME = EFFECT_MIN * 60
+WORK_TIME = WORK_MIN * 60
+PAUSE_TIME = PAUSE_MIN * 60
 # ==================================================
 
 # Global state
@@ -111,7 +111,7 @@ def dynamic_smooth_fade(duration=1.0):
 
 # -------- Main loop --------
 def effect_loop():
-    """Main loop: waits WAIT_TIME, runs dynamic fade for EFFECT_TIME, repeats until stopped"""
+    """Main loop: waits WORK_TIME, runs dynamic fade for PAUSE_TIME, repeats until stopped"""
     global first_run
     while running and not stop_event.is_set():
         if first_run:
@@ -119,16 +119,16 @@ def effect_loop():
             ready_light_sequence()
             first_run = False
 
-        logger.info(f"Waiting {WAIT_MIN} minutes...")
-        for _ in range(int(WAIT_TIME)):
+        logger.info(f"Working {WORK_MIN} minutes...")
+        for _ in range(int(WORK_TIME)):
             if stop_event.is_set():
                 return
             sleep(1)
 
         if stop_event.is_set():
             return
-        logger.info(f"Running {EFFECT_MIN} minutes dynamic smooth fade effect")
-        end_time = time() + EFFECT_TIME
+        logger.info(f"Pause {PAUSE_MIN} minutes dynamic smooth fade effect")
+        end_time = time() + PAUSE_TIME
         while time() < end_time and not stop_event.is_set():
             dynamic_smooth_fade(duration=2.0)
 
@@ -165,7 +165,7 @@ touchphat.on_touch("Enter", lambda _: toggle_running())
 touchphat.on_touch("Back", lambda _: reset_to_initial_state())
 
 # -------- Keep script running --------
-logger.info(f"All LEDs on. Press Enter to start/stop the loop. WAIT={WAIT_MIN} min, EFFECT={EFFECT_MIN} min")
+logger.info(f"All LEDs on. Press Enter to start/stop the loop. WORK={WORK_MIN} min, PAUSE={PAUSE_MIN} min")
 try:
     while True:
         sleep(1)
